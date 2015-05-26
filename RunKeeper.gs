@@ -31,6 +31,13 @@ Context.prototype.connect = function() {
   }
 }
 
+Context.prototype.getFitnessActivityFeed = function() {
+  return new Enumerator(this, this.userData.fitness_activities, 'application/vnd.com.runkeeper.FitnessActivityFeed+json', function(data) {
+    data.start_time = new Date(data.start_time);
+    return data;
+  });
+}
+
 Context.prototype.getWeightFeed = function() {
   return new Enumerator(this, this.userData.weight, 'application/vnd.com.runkeeper.WeightSetFeed+json', function(data) {
     data.timestamp = new Date(data.timestamp);

@@ -32,42 +32,10 @@ Context.prototype.connect = function() {
 }
 
 Context.prototype.getWeightFeed = function() {
-  return {
-    context: this,
-    current: null,
-    currentPage: { items: [], next: this.userData.weight },
-    currentPageIndex: -1,
-    moveNext: function() {
-      
-      this.currentPageIndex++;
-    
-      if (this.currentPageIndex >= this.currentPage.items.length) {
-        if (this.currentPage.next) {
-          
-          var weightUrl = this.currentPage.next;
-          var weightSetFeedData = {
-            headers: {
-              Authorization: 'Bearer ' + this.context.service.getAccessToken(),
-              Accept: 'application/vnd.com.runkeeper.WeightSetFeed+json'
-            }
-          };
-          var weightResponse = UrlFetchApp.fetch(this.context.urlBase + weightUrl, weightSetFeedData);
-          
-          this.currentPage = JSON.parse(weightResponse.getContentText());
-          this.currentPageIndex = -1;
-          
-          return this.moveNext();
-        }
-        
-        this.current = null;
-        return false;
-      }
-    
-      this.current = this.currentPage.items[this.currentPageIndex];
-      this.current.timestamp = new Date(this.current.timestamp)
-      return true;
-    }
-  };
+  return new Enumerator(this, this.userData.weight, 'application/vnd.com.runkeeper.WeightSetFeed+json', function(data) {
+    data.timestamp = new Date(data.timestamp);
+    return data;
+  });
 }
 
 Context.prototype.setWeight = function(timestamp, weight, fat_percent) {
